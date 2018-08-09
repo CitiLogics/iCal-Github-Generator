@@ -5,37 +5,36 @@ const octokit = require('@octokit/rest')() // to query github
 const _ = require('underscore')
 
 
-octokit.authenticate({
-  type: 'token',
-  token: process.env.GITHUB_ACCESS_TOKEN
-})
 
 app.get('/', function(req, res) {
   console.log(new Date() + "accessing /")
   res.status(200).send('nothing to see here')
 })
 
-app.get('/:owner/:repo', function (req, res) {
-  console.log(req.params.owner)
-  let eventsObj = [] // empty array to hold all events
+app.get('/:gh_token/:owner/:repo', function (req, res) {
+  octokit.authenticate({
+    type: 'token',
+    token: req.params.gh_token
+  });
   console.log(new Date() + " accessing /" + req.params.owner + "/" + req.params.repo)
   octokit.issues.getMilestones({
     owner: req.params.owner,
     repo: req.params.repo,
     state: 'open'
   }).then(({data, headers, status}) => {
-    _.each(data, (eventObj) => {
-      let temp = {}
-      temp['summary'] = eventObj.title
-      temp['start'] = moment(eventObj.due_on).startOf('day')
-      temp['allDay'] = 'true'
-      temp['description'] = eventObj.description
-      eventsObj = eventsObj.concat(temp)
-    })
-    console.log(eventsObj);
+    let events = _.map(data, (e) => {
+      return {
+        summary: e.title,
+        start: moment(e.due_on).startOf('day'),
+        allDay: 'true',
+        description: e.description,
+        url: e.html_url
+      };
+    });
+    console.log(events);
     const cal = ical({
       name: 'GITHUB: '+ req.params.repo,
-      events: eventsObj
+      events: events
     })
     cal.serve(res)
   }).catch((error) => {

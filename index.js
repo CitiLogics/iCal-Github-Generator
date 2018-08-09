@@ -9,13 +9,27 @@ const _ = require('underscore')
 app.get('/', function(req, res) {
   console.log(new Date() + "accessing /")
   res.status(200).send('nothing to see here')
-})
+});
 
-app.get('/:gh_token/:owner/:repo', function (req, res) {
-  octokit.authenticate({
+app.get('/private/:gh_token/:owner/:repo', function (req, res) {
+  let auth = {
     type: 'token',
     token: req.params.gh_token
-  });
+  };
+  return getMilestoneCalendar(req,res,auth);
+});
+
+app.get('/:owner/:repo', function (req, res) {
+  return getMilestoneCalendar(req,res);
+});
+
+let getMilestoneCalendar = function(req, res, auth) {
+  if (auth) {
+    octokit.authenticate({
+      type: 'token',
+      token: req.params.gh_token
+    });
+  }
   console.log(new Date() + " accessing /" + req.params.owner + "/" + req.params.repo)
   octokit.issues.getMilestones({
     owner: req.params.owner,
@@ -40,5 +54,5 @@ app.get('/:gh_token/:owner/:repo', function (req, res) {
   }).catch((error) => {
     console.log("ERROR : " + error)
   })
-})
+}
 app.listen(3005, () => console.log('listening on port 3005!'))

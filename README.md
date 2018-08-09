@@ -1,22 +1,26 @@
-# ADD GITHUB MILESTONE EVENTS TO YOUR CALENDAR #
+# Add GitHub Milestones to your Calendar
 
 
-## RUNNING THE NODE APP ##
+## RUNNING THE NODE APP
 ```
 npm install
 node index.js
 ```
+## Do it with Docker
+```
+docker run -d -p 3005:3005 citilogics/ical-github-generator:latest
+```
 
 ## How do I use it? ##
-when the service is running it accepts end points in the following format
+When the service is running, you can subscribe to your repository's milestones using the following URL scheme:
 
 ```
 // for public repos:
-<serverip>/<owner_or_org_name>/<repo_name>
+http://<serverip>:<port>/<owner_or_org_name>/<repo_name>
 
-// for private repos:
-<serverip>/private/<github_personal_access_token>/<owner_or_org_name>/<repo_name>
+// for private repos (probably should use HTTPS):
+http://<serverip>:<port>/private/<github_personal_access_token>/<owner_or_org_name>/<repo_name>
 
 ```
 
-Which gives you a CalDav feed of milestone events for that repo. Make sure to have access token in env variables of the node server if you are accessing a private repo.
+Which gives you a CalDav feed of milestone events for that repo. Make sure to set up a personal access token if you are accessing a private repo.
